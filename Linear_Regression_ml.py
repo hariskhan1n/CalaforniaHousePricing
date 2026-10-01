@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-%matplotlib inline
 
 from sklearn.datasets import fetch_california_housing
 dataset = fetch_california_housing(as_frame=True)
@@ -33,6 +32,8 @@ from sklearn.preprocessing import StandardScaler
 scaler = StandardScaler()
 x_train = scaler.fit_transform(x_train)
 x_test = scaler.transform(x_test)
+import pickle
+pickle.dump(scaler, open("scaler.pkl", "wb"))
 
 ## Training the Model
 from sklearn.linear_model import LinearRegression
