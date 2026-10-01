@@ -1,0 +1,383 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>California House Price Predictor</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a, #2563eb);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            overflow-x: hidden;
+        }
+
+        /* Animated background circles */
+
+        .circle {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(5px);
+            opacity: 0.25;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        .circle1 {
+            width: 250px;
+            height: 250px;
+            background: #38bdf8;
+            top: -80px;
+            left: -80px;
+        }
+
+        .circle2 {
+            width: 300px;
+            height: 300px;
+            background: #818cf8;
+            bottom: -100px;
+            right: -100px;
+            animation-delay: 2s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-30px);
+            }
+        }
+
+        /* Main card */
+
+        .container {
+            position: relative;
+            width: 650px;
+            max-width: 100%;
+            padding: 35px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+
+            animation: appear 0.8s ease;
+        }
+
+        @keyframes appear {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #dbeafe;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        /* Form grid */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            color: white;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 10px;
+            outline: none;
+
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+
+            transition: 0.3s;
+        }
+
+        input::placeholder {
+            color: #cbd5e1;
+        }
+
+        input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Button */
+
+        .button-container {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+
+            background: linear-gradient(90deg, #06b6d4, #3b82f6);
+
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.6);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Prediction result */
+
+        .result {
+            margin-top: 25px;
+            padding: 18px;
+
+            text-align: center;
+
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(134, 239, 172, 0.4);
+
+            border-radius: 12px;
+
+            color: #bbf7d0;
+
+            font-size: 20px;
+            font-weight: bold;
+
+            animation: resultAppear 0.6s ease;
+        }
+
+        @keyframes resultAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Mobile */
+
+        @media (max-width: 600px) {
+
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 25px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-container {
+                grid-column: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Animated background -->
+
+    <div class="circle circle1"></div>
+    <div class="circle circle2"></div>
+
+
+    <!-- Main application -->
+
+    <div class="container">
+
+        <h1>🏠 California House Price</h1>
+
+        <p class="subtitle">
+            Enter the house information to predict its price
+        </p>
+
+
+        <!-- Flask sends this form to /predict -->
+
+        <form action="/predict" method="POST">
+
+            <div class="form-grid">
+
+                <div class="input-group">
+                    <label>Median Income</label>
+                    <input
+                        type="number"
+                        step="any"
+                        name="MedInc"
+                        placeholder="Example: 3.5"
+                        required>
+                </div>
+
+
+                <div class="input-group">
+                    <label>House Age</label>
+                    <input
+                        type="number"
+                        step="any"
+                        name="HouseAge"
+                        placeholder="Example: 25"
+                        required>
+                </div>
+
+
+                <div class="input-group">
+                    <label>Average Rooms</label>
+                    <input
+                        type="number"
+                        step="any"
+                        name="AveRooms"
+                        placeholder="Example: 5.2"
+                        required>
+                </div>
+
+
+                <div class="input-group">
+                    <label>Average Bedrooms</label>
+                    <input
+                        type="number"
+                        step="any"
+                        name="AveBedrms"
+                        placeholder="Example: 1.0"
+                        required>
+                </div>
+
+
+                <div class="input-group">
+                    <label>Population</label>
+                    <input
+                        type="number"
+                        step="any"
+                        name="Population"
+                        placeholder="Example: 1200"
+                        required>
+                </div>
+
+
+                <div class="input-group">
+                    <label>Average Occupancy</label>
+                    <input
+                        type="number"
+                        step="any"
+                        name="AveOccup"
+                        placeholder="Example: 3.0"
+                        required>
+                </div>
+
+
+                <div class="input-group">
+                    <label>Latitude</label>
+                    <input
+                        type="number"
+                        step="any"
+                        name="Latitude"
+                        placeholder="Example: 34.2"
+                        required>
+                </div>
+
+
+                <div class="input-group">
+                    <label>Longitude</label>
+                    <input
+                        type="number"
+                        step="any"
+                        name="Longitude"
+                        placeholder="Example: -118.3"
+                        required>
+                </div>
+
+
+                <div class="button-container">
+
+                    <button type="submit">
+                        🔮 Predict House Price
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+
+        <!-- Flask puts prediction_text here -->
+
+        {% if prediction_text %}
+
+        <div class="result">
+            {{ prediction_text }}
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</body>
+
+</html>
+```
